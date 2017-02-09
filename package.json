@@ -1,0 +1,7 @@
+{
+	"description": "Tools used by Artik to upload and debug",
+	"name": "tool-artik",
+	"system": "*",
+	"url": "http://artik.io",
+	"version": "0.0.1"
+}
