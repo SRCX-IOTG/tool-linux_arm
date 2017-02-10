@@ -18,9 +18,13 @@ l = upload_port.index("@")
 password = upload_port[:l]
 upload_port = upload_port[l+1:]
 
-l = upload_port.index(":")
-target_addr = upload_port[:l]
-upload_port = upload_port[l+1:]
+try:
+	l = upload_port.index(":")
+	target_addr = upload_port[:l]
+	upload_port = upload_port[l+1:]
+except:
+	target_addr = upload_port
+	upload_port = "5678"
 if uploader == 'scp':
 	f = open(join(project_path, ".pioenvs", "target.sh"), "w")
 	f.write("spawn scp "+target_bin+" "+user_name+"@"+target_addr+":~/gdb")
@@ -33,7 +37,7 @@ if uploader == 'scp':
 	f.write("\ninteract\n")
 	f.close()
 	# os.system("expect ./.pioenvs/target.sh")
-	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target.sh; exec bash\"")
+	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target.sh; read -s -n1 \"")
 
 else:
 	f = open(join(project_path, ".pioenvs", "upload.gdb"), "w")
