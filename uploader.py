@@ -27,13 +27,31 @@ except:
 	upload_port = "5678"
 if uploader == 'scp':
 	with open(join(project_path, ".pioenvs", "target"), "w") as f:
-		f.write("spawn scp %s %s@%s:~/scp_program" % (target_bin, user_name, target_addr))
-		f.write("\nexpect \"%s@%s's password:\"" % (user_name, target_addr))
-		f.write("\nsend \"%s\\r\"" % (password))
-		f.write("\nspawn ssh %s@%s \"./scp_program\"" % (user_name, target_addr))
-		f.write("\nexpect \"password\"")
-		f.write("\nsend \"%s\\r\"" % (password))
-		f.write("\ninteract\n")
+		f.write('\
+			set user "%s"\n\
+			set password "%s"\n\
+			set targetAddr "%s"\n\
+			set targetBin "%s"\n\
+			spawn scp $targetBin $user@$targetAddr:~/scp_program\n\
+			expect {\n\
+				"(yes/no)?" {\n\
+					send "yes\\r "; \n\
+					exp_continue;\n\
+				}\n\
+				"*assword:" {\n\
+					send "$password\\r"; \n\
+				}\n\
+			}\n\
+			\n\
+			spawn ssh $user@$targetAddr "./scp_program"\n\
+			expect {\n\
+				"*assword:" {\n\
+					send "$password\\r"; \n\
+				}\n\
+			}\n\
+			interact'
+			% (user_name, password, target_addr, target_bin)
+		)
 
 	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target; read -s -n1 \"")
 
@@ -44,12 +62,28 @@ else:
 		f.write("\nfile %s" % (target_bin))
 		f.write("\nset remote exec-file "+"./gdb/program")
 		f.write("\nbreak main\nrun\n")
-
+		
 	with open(join(project_path, ".pioenvs", "target"), "w") as f:
-		f.write("spawn ssh %s@%s \"mkdir gdb;gdbserver --multi :%s\"" % (user_name, target_addr, upload_port))
-		f.write("\nexpect \"password\"")
-		f.write("\nsend \"%s\\r\"" % (password))
-		f.write("\ninteract\n")
+		f.write('\
+			set user "%s"\n\
+			set password "%s"\n\
+			set targetAddr "%s"\n\
+			set targetBin "%s"\n\
+			set uploadPort "%s"\n\
+			spawn ssh $user@$targetAddr "mkdir gdb;gdbserver --multi :$uploadPort"\n\
+			expect {\n\
+				"(yes/no)?" {\n\
+					send "yes\\r "; \n\
+					exp_continue;\n\
+				}\n\
+				"*assword:" {\n\
+					send "$password\\r"; \n\
+				}\n\
+			}\n\
+			interact'
+			% (user_name, password, target_addr, target_bin, upload_port)
+		)
+
 
 	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target;\"")
 	os.system("gnome-terminal -x bash -c \"%s -x %s/.pioenvs/upload.gdb\"" % (uploader, project_path))
