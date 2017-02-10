@@ -27,15 +27,15 @@ except:
 	upload_port = "5678"
 if uploader == 'scp':
 	f = open(join(project_path, ".pioenvs", "target"), "w")
-	f.write("spawn scp %s %s@%s:~/gdb" % (target_bin, user_name, target_addr))
+	f.write("spawn scp %s %s@%s:~/scp_program" % (target_bin, user_name, target_addr))
 	f.write("\nexpect \"%s@%s's password:\"" % (user_name, target_addr))
 	f.write("\nsend \"%s\\r\"" % (password))
-	f.write("\nspawn ssh %s@%s \"./gdb/program\"" % (user_name, target_addr))
+	f.write("\nspawn ssh %s@%s \"./scp_program\"" % (user_name, target_addr))
 	f.write("\nexpect \"password\"")
 	f.write("\nsend \"%s\\r\"" % (password))
 	f.write("\ninteract\n")
 	f.close()
-	# os.system("expect ./.pioenvs/target")
+	
 	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target; read -s -n1 \"")
 
 else:
