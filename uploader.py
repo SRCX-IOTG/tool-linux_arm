@@ -26,33 +26,30 @@ except:
 	target_addr = upload_port
 	upload_port = "5678"
 if uploader == 'scp':
-	f = open(join(project_path, ".pioenvs", "target"), "w")
-	f.write("spawn scp %s %s@%s:~/scp_program" % (target_bin, user_name, target_addr))
-	f.write("\nexpect \"%s@%s's password:\"" % (user_name, target_addr))
-	f.write("\nsend \"%s\\r\"" % (password))
-	f.write("\nspawn ssh %s@%s \"./scp_program\"" % (user_name, target_addr))
-	f.write("\nexpect \"password\"")
-	f.write("\nsend \"%s\\r\"" % (password))
-	f.write("\ninteract\n")
-	f.close()
-	
+	with open(join(project_path, ".pioenvs", "target"), "w") as f:
+		f.write("spawn scp %s %s@%s:~/scp_program" % (target_bin, user_name, target_addr))
+		f.write("\nexpect \"%s@%s's password:\"" % (user_name, target_addr))
+		f.write("\nsend \"%s\\r\"" % (password))
+		f.write("\nspawn ssh %s@%s \"./scp_program\"" % (user_name, target_addr))
+		f.write("\nexpect \"password\"")
+		f.write("\nsend \"%s\\r\"" % (password))
+		f.write("\ninteract\n")
+
 	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target; read -s -n1 \"")
 
 else:
-	f = open(join(project_path, ".pioenvs", "upload.gdb"), "w")
-	f.write("target extended-remote %s:%s" % (target_addr, upload_port))
-	f.write("\nremote put %s ./gdb/program" % (target_bin))
-	f.write("\nfile %s" % (target_bin))
-	f.write("\nset remote exec-file "+"./gdb/program")
-	f.write("\nbreak main\nrun\n")
-	f.close()
+	with open(join(project_path, ".pioenvs", "upload.gdb"), "w") as f:
+		f.write("target extended-remote %s:%s" % (target_addr, upload_port))
+		f.write("\nremote put %s ./gdb/program" % (target_bin))
+		f.write("\nfile %s" % (target_bin))
+		f.write("\nset remote exec-file "+"./gdb/program")
+		f.write("\nbreak main\nrun\n")
 
-	f = open(join(project_path, ".pioenvs", "target"), "w")
-	f.write("spawn ssh %s@%s \"mkdir gdb;gdbserver --multi :%s\"" % (user_name, target_addr, upload_port))
-	f.write("\nexpect \"password\"")
-	f.write("\nsend \"%s\\r\"" % (password))
-	f.write("\ninteract\n")
-	f.close()
+	with open(join(project_path, ".pioenvs", "target"), "w") as f:
+		f.write("spawn ssh %s@%s \"mkdir gdb;gdbserver --multi :%s\"" % (user_name, target_addr, upload_port))
+		f.write("\nexpect \"password\"")
+		f.write("\nsend \"%s\\r\"" % (password))
+		f.write("\ninteract\n")
 
 	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target;\"")
 	os.system("gnome-terminal -x bash -c \"%s -x %s/.pioenvs/upload.gdb\"" % (uploader, project_path))
