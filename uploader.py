@@ -26,35 +26,33 @@ except:
 	target_addr = upload_port
 	upload_port = "5678"
 if uploader == 'scp':
-	f = open(join(project_path, ".pioenvs", "target.sh"), "w")
-	f.write("spawn scp "+target_bin+" "+user_name+"@"+target_addr+":~/gdb")
-	f.write("\nexpect \""+user_name+"@"+target_addr+"'s password:\"")
-	f.write("\nsend \""+password+"\\r\"")
-
-	f.write("\nspawn ssh "+user_name+"@"+target_addr+" \"./gdb/program\"")
+	f = open(join(project_path, ".pioenvs", "target"), "w")
+	f.write("spawn scp %s %s@%s:~/gdb" % (target_bin, user_name, target_addr))
+	f.write("\nexpect \"%s@%s's password:\"" % (user_name, target_addr))
+	f.write("\nsend \"%s\\r\"" % (password))
+	f.write("\nspawn ssh %s@%s \"./gdb/program\"" % (user_name, target_addr))
 	f.write("\nexpect \"password\"")
-	f.write("\nsend \""+password+"\\r\"")
+	f.write("\nsend \"%s\\r\"" % (password))
 	f.write("\ninteract\n")
 	f.close()
-	# os.system("expect ./.pioenvs/target.sh")
-	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target.sh; read -s -n1 \"")
+	# os.system("expect ./.pioenvs/target")
+	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target; read -s -n1 \"")
 
 else:
 	f = open(join(project_path, ".pioenvs", "upload.gdb"), "w")
-	f.write("target extended-remote "+target_addr+":"+upload_port)
-	f.write("\nremote put "+target_bin+" ./gdb/program")
-	f.write("\nfile "+target_bin)
+	f.write("target extended-remote %s:%s" % (target_addr, upload_port))
+	f.write("\nremote put %s ./gdb/program" % (target_bin))
+	f.write("\nfile %s" % (target_bin))
 	f.write("\nset remote exec-file "+"./gdb/program")
 	f.write("\nbreak main\nrun\n")
 	f.close()
 
-	f = open(join(project_path, ".pioenvs", "target.sh"), "w")
-	f.write("spawn ssh root@"+target_addr+" \"mkdir gdb;gdbserver --multi :"+upload_port+"\"")
+	f = open(join(project_path, ".pioenvs", "target"), "w")
+	f.write("spawn ssh %s@%s \"mkdir gdb;gdbserver --multi :%s\"" % (user_name, target_addr, upload_port))
 	f.write("\nexpect \"password\"")
-	f.write("\nsend \""+password+"\\r\"")
+	f.write("\nsend \"%s\\r\"" % (password))
 	f.write("\ninteract\n")
 	f.close()
 
-	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target.sh;\"")
-
-	os.system("gnome-terminal -x bash -c \""+uploader+" -x "+project_path+"/.pioenvs/upload.gdb\"")
+	os.system("gnome-terminal -x bash -c \"expect ./.pioenvs/target;\"")
+	os.system("gnome-terminal -x bash -c \"%s -x %s/.pioenvs/upload.gdb\"" % (uploader, project_path))
