@@ -1,7 +1,7 @@
 {
-	"description": "Tools used by Artik to upload and debug",
-	"name": "tool-artik",
-	"system": "*",
-	"url": "http://artik.io",
+	"description": "Tools used by linux_arm platform to upload",
+	"name": "tool-linux_arm",
+	"system": "linux_i686",
+	"url": "*",
 	"version": "0.0.1"
 }
